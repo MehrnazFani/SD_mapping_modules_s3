@@ -11,20 +11,20 @@ The environemt is the main environment for SD_mapping
 The main file to run is inference.py. 
 
 
-### input configuration
+### Input Configuration
 Some configuration of inputs should be performed wihtin the inference.py in __main__ scope for each city that we want to run inference on.
 > List of required configurations are as follows:
 
-> **config_dir =**  <"path/to/config.json">  This path is inside code folder, is fixed and you do not to change it <br>
-> **inference_cities =** {'pittsburg-pennsylvania':['5','und']} A dictionary for list of cities you want to perform inferecne on. <br>
-> **tile_size =** "1250"  It is fixed donot need to be change. <br>
-> **overlap_size =** "150" It is fixed donot need to be changed. <br>
-> **project_name =** "RoadSurface_Detection" or "RoudSurface_Detection" <br>
-> **path_to_model =** "path/to/weights.pth.tar" you should change it if you have new RoadSurface/LaneMarker_Solids model. <br>
-> **user_name =** <"user_name">  it is name of the person running the code! <br>
-> **datasets_name =** "datasets_vertical"   datasets folder name <br>
-> **batch_size =** 1                         Batch size can be increased if your have a machine with a high-capacity memeory <br>
-> **model_trained_on_multiple_gpu =** True   keep this value always as True even if your model is train on a single GPU <br>
+> **config_dir =  <"path/to/config.json">** &nbsp;&nbsp;&nbsp;This path is inside code folder, is fixed and you do not to change it <br>
+> **inference_cities = {'pittsburg-pennsylvania':['5','und']}** &nbsp;&nbsp;&nbsp;A dictionary for list of cities you want to perform inferecne on. <br>
+> **tile_size = "1250"** &nbsp;&nbsp;&nbsp;It is fixed donot need to be change. <br>
+> **overlap_size = "150"** &nbsp;&nbsp;&nbsp;It is fixed donot need to be changed. <br>
+> **project_name = "RoadSurface_Detection" or "RoudSurface_Detection"** <br>
+> **path_to_model = "path/to/weights.pth.tar"** &nbsp;&nbsp;&nbsp;you should change it if you have new RoadSurface/LaneMarker_Solids model. <br>
+> **user_name = <"user_name">** &nbsp;&nbsp;&nbsp;it is name of the person running the code! <br>
+> **datasets_name = "datasets_vertical"** &nbsp;&nbsp;&nbsp;datasets folder name <br>
+> **batch_size = 1** &nbsp;&nbsp;&nbsp;Batch size can be increased if your have a machine with a high-capacity memeory <br>
+> **model_trained_on_multiple_gpu = True** &nbsp;&nbsp;&nbsp;keep this value always as True even if your model is train on a single GPU <br>
 
 The Following Image Shows an Example of Configuration Setting: <br>
 ![image for inference configuration](imgs_readme/inference_config.png)
@@ -38,7 +38,7 @@ After setting up the configuration,you can run the inference.py and in result a 
 Example of output_dir = "s3://geomate-data-repo-dev/datasets_vertical/pittsburg-pennsylvania/inference/und/RoadSurface_Detection/5_percent/1250_150/mehrnaz/2024_12_03/09_49/outputs/rasters.pkl"
 
 ```bash
- # to run the code locally
+# not to get credintial error first have aws configure sso set up and then run the following
  export AWS_PROFILE=PowerUserAccess-691506669376 
  
  python inference.py
