@@ -9,12 +9,11 @@ from collections import OrderedDict
 from datetime import datetime
 import sys
 import boto3
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 from PIL import Image
 from io import BytesIO
 import geopandas as gpd
 import pickle
-import s3_utils
 
 
 s3 = boto3.client('s3')
@@ -23,42 +22,58 @@ class UseBucket:
     
     def __init__(self, bucket_name="geomate-data-repo-dev"):
         self.bucket_name = bucket_name
-
-    def s3_listdir(self, prefix, suffix=""):
+    
+    def s3_listdir( self, directory, suffix=""):
         "mimic os.listdir for s3 bucket, and even go beyond"
         # List objects within the directory specified in prefix, having the type specified in suffix.
         # if no suffix is provided all the files in the prefix directory will be listed
         # for example for listing this file 'bucket_name/path/to/file/image1.jp2   
-        # prefix='path/to/file/'    
+        # prefix= directory = 'path/to/files/'    
         # suffix = '.jp2'
-        response = s3.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix)
-        # Check if 'Contents' is in response and extract image keys
-        if 'Contents' in response:
-            file_keys = [obj['Key'] for obj in response['Contents'] if obj['Key'].lower().endswith((suffix))]
-            file_names = [fkey.split('/')[-1] for fkey in file_keys]
-            if  not file_names:
+
+        # Initialize the paginator
+        paginator = s3.get_paginator('list_objects_v2')
+        page_iterator = paginator.paginate(Bucket=self.bucket_name, Prefix=directory)
+
+        file_keys = []
+        
+        # Iterate through each page of results and get all the file_keys for files ending with suffix
+        for page in page_iterator:
+            file_keys_page = []
+            if 'Contents' in page:
+                file_keys_page = [obj['Key'] for obj in page['Contents'] if obj['Key'].lower().endswith((suffix))]
+                file_keys.extend(file_keys_page)
+        file_names = [fkey.split('/')[-1] for fkey in file_keys]
+        if  not file_names:
                 print(f"No file of type {suffix} is found in this directory!") 
-            return file_names
-        else:
-            print("No file is found in the specified directory.")
+        return file_names
+
     
-    def s3_glob(self, prefix, suffix=""):
+    def s3_glob(self, directory, suffix=""):
         "mimic glob.glob() for s3 bucket, and even go beyond"
         # List full dir of objects within the directory specified in prefix, having the type specified in suffix.
         # if no suffix is provided all the files in the prefix directory will be listed
         # for example for listing this file 'bucket_name/path/to/file/image1.jp2   
         # prefix='path/to/file/'    
         # suffix = '.jp2'
-        response = s3.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix)
-        # Check if 'Contents' is in response and extract image keys
-        if 'Contents' in response:
-            file_keys = [obj['Key'] for obj in response['Contents'] if obj['Key'].lower().endswith((suffix))]
-            if  not file_keys:
-                print(f"No file of type {suffix} is found in this directory!") 
-            return file_keys
-        else:
-            print("No file is found in the specified directory.")
+        
+        # Initialize the paginator
+        paginator = s3.get_paginator('list_objects_v2')
+        page_iterator = paginator.paginate(Bucket=self.bucket_name, Prefix=directory)
+
+        file_keys = []
+        
+        # Iterate through each page of results and get all the file_keys for files ending with suffix
+        for page in page_iterator:
+            file_keys_page = []
+            if 'Contents' in page:
+                file_keys_page = [obj['Key'] for obj in page['Contents'] if obj['Key'].lower().endswith((suffix))]
+                file_keys.extend(file_keys_page)
+        if  not file_keys:
+            print(f"No file of type {suffix} is found in this directory!") 
+        return file_keys
     
+   
     def s3_walk(self, prefix=''):
         """Mimics os.walk for an S3 bucket, yielding (directory, subdirs, files)."""
         paginator = s3.get_paginator('list_objects_v2')
@@ -83,6 +98,24 @@ class UseBucket:
         response = s3.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix, MaxKeys=1)
         return 'Contents' in response  # True if the prefix exists, False otherwise
     
+    def s3_file_exists(self, key):
+        """
+        mimics os.path.exist('file_path') for a file on s3 bucket key = file_path
+        Check if a file exists in an S3 bucket.
+        param key: Path of the file (object key) in the bucket
+        return: True if the file exists, False otherwise
+        """
+        try:
+            s3.head_object(Bucket=self.bucket_name, Key=key)
+            return True  # If head_object succeeds, the file exists
+        except ClientError as e:
+            # Check for "Not Found" error (404)
+            if e.response['Error']['Code'] == "404":
+                return False
+            else:
+                # For other errors, re-raise the exception
+                raise
+    
     def s3_makedirs(self, folder_path):
         if not folder_path.endswith('/'):# Ensure folder path ends with a slash
             folder_path += '/'
@@ -102,10 +135,21 @@ class UseBucket:
     def s3_rasterio_open(self, s3_key):
         "Mimics src = rasterio.open(img_adrs), while s3_key = image_adrs"
         s3_url = f"s3://{self.bucket_name}/{s3_key}"
-        # Open the JP2 image using rasterio
-        src = rio.open(s3_url)
-        return src  
-    
+
+        from rasterio.errors import RasterioIOError
+        attempts = 3  # Maximum number of attempts to open the image
+        for attempt in range(1, attempts + 1):
+            try:
+                # Try opening the JP2 image using rasterio
+                src = rio.open(s3_url)
+                return src
+                break
+            except RasterioIOError as e:
+                print(f"RasterioIOError: {e}")
+                if attempt == max_attempts:
+                    print("All attempts failed. Re-raising the exception.")
+                    raise e  # Re-raise the exception if all attempts fail
+        
     def s3_df_to_csv(self, data_frame, output_path):
         "Mimics df.to_csv('output_path')"
         # Save DataFrame to an in-memory binary buffer

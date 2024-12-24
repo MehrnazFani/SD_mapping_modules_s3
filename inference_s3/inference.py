@@ -51,11 +51,12 @@ class Inference:
         self.device = "cuda:0" if torch.cuda.is_available() else 'cpu'
         print(f"Using device: {self.device}")
         
-        # Loading the mode from s3 if path_to model is an s3_key
-        self.checkpoint = my_bucket.s3_torch_load(self.device, path_to_model)
-        
-        # Loading the mode from local if path_to model is local
-        # self.checkpoint = torch.load(path_to_model, map_location=self.device)
+        if path_to_model[0] !='/': # s3_key for weights does not strart with /
+            # Loading the mode from s3 if path_to model is an s3_key
+            self.checkpoint = my_bucket.s3_torch_load(self.device, path_to_model)
+        else:
+            # Loading the mode from local if path_to model is local
+            self.checkpoint = torch.load(path_to_model, map_location=self.device)
         
         self.model = MODELS["StackHourglassNetMTL"]()
 
@@ -262,7 +263,7 @@ def cover_single_city(path_to_tiles,
                         rasters[folder_name] = [vectorized_mask]
                     
 
-    manage_post_processing(rasters, inferencer.path_to_save_rasters, path_to_model)
+    manage_post_processing(rasters, inferencer.path_to_save_rasters)
 
     return list_of_tiles_with_error_for_each_city 
 
@@ -285,7 +286,7 @@ def vectorise(fname, red, transform, crs, width):
         result.append({ "type": "Feature", "properties": {},"geometry": { "type": "Polygon", "coordinates":polygon[0]["coordinates"]}} )
     return [result,crs,round(width)]
 
-def manage_post_processing(rasters, path_to_save_rasters, path_to_model):
+def manage_post_processing(rasters, path_to_save_rasters):
     if not my_bucket.s3_dir_exists(path_to_save_rasters):
         my_bucket.s3_makedirs(path_to_save_rasters)
    
@@ -309,12 +310,15 @@ if __name__ == '__main__':
     
     # input configuration
     config_dir = "./config.json"
-    inference_cities = {'pittsburg-pennsylvania':['5','und']} 
+    inference_cities = {'flint-michigan-2024':['intersection','und']}
+    #{'troy-michigan-2024':['intersection','und'], 'flint-michigan-2024':['intersection','und'], 'auburnhills-michigan-sat-2024':['100','und'], 'southfield-michigan-maxar-2024':['100','und'] } 
     tile_size = "1250" 
     overlap_size = "150" 
     project_name = "RoadSurface_Detection"
     # path to model in s3 bucket, exclude s3://bucket_name/
-    path_to_model = "weights/RoadSurface_regina_TF_model_best_weights.pth.tar"
+    path_to_model = "weights/RoadSurface_NearMap_Maxar_general_model_20epochs.tar"
+    #"/media/jerry/Data/weights/RoadSurface_TL_annarbor_8epochs.pth.tar"
+    #"weights/RoadSurface_regina_TF_model_best_weights.pth.tar"
     user_name = "mehrnaz" 
     datasets_name = "datasets_vertical"
     batch_size = 1

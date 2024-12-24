@@ -27,7 +27,7 @@ Some configuration of inputs should be performed wihtin the inference.py in __ma
 > **model_trained_on_multiple_gpu = True** &nbsp;&nbsp;&nbsp;keep this value always as True even if your model is train on a single GPU <br>
 
 The Following Image Shows an Example of Configuration Setting: <br>
-![image for inference configuration](imgs_readme/inference_config.png)
+![image for inference configuration](imgs_readme/inference_config1.png)
 
 
 ### Running Inference 

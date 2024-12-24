@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "inference-s3"
+version = "0.1.0"
+description = ""
+authors = ["mehrnazfani <fani.mehrnaz@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+torch = {version = "^2.5.1+cu121", source = "pytorch-cu121"}
+torchvision = {version = "^0.20.1+cu121", source = "pytorch-cu121"}
+torchaudio = {version = "^2.5.1+cu121", source = "pytorch-cu121"}
+numba = "^0.60.0"
+rasterio = "^1.4.3"
+matplotlib = "^3.10.0"
+tqdm = "^4.67.1"
+scikit-image = "^0.25.0"
+pillow = "^11.0.0"
+pandas = "^2.2.3"
+geopandas = "^1.0.1"
+boto3 = "^1.35.83"
+opencv-python = "^4.10.0.84"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "supplemental"
