@@ -28,8 +28,8 @@ Some configuration of inputs should be performed wihtin the inference.py in __ma
 > **batch_size = 1** &nbsp;&nbsp;&nbsp;Batch size can be increased if your have a machine with a high-capacity memeory <br>
 > **model_trained_on_multiple_gpu = True** &nbsp;&nbsp;&nbsp;keep this value always as True even if your model is train on a single GPU <br>
 
-The Following Image Shows an Example of Configuration Setting: <br>
-![image for inference configuration](imgs_readme/inference_config1.png)
+ The Following Image Shows an Example of Configuration Setting: <br>
+![image for inference configuration](imgs_readme/inference_config.png)
 
 
 ### Running Inference 
