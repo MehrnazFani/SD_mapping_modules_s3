@@ -3,9 +3,11 @@ The inference_s3 code is an stand alone code to run inference fro RoadSurface/La
 
 
 ## Environment
-The environemt is the main environment for SD_mapping
+The environemt for is a poetry environment. <br>
+Activate the environment first navigate to project folder and then activate the invironment:
 ```bash
-  conda activate SD_mapping_env
+  cd inferene_s3
+  poetry shell
 ```
 ## Usage : 
 The main file to run is inference.py. 
