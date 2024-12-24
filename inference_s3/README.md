@@ -3,8 +3,8 @@ The inference_s3 code is an stand alone code to run inference fro RoadSurface/La
 
 
 ## Environment
-The environemt for is a poetry environment. <br>
-Activate the environment first navigate to project folder and then activate the invironment:
+The environemt is a poetry environment. <br>
+Activate the environment: First navigate to project folder and then activate the invironment:
 ```bash
   cd inferene_s3
   poetry shell
