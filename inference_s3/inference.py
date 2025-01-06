@@ -306,11 +306,26 @@ def manage_post_processing(rasters, path_to_save_rasters):
         my_bucket.s3_pickle_dump(path_to_save_rasters, temp_raster)
 
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--city_ls', nargs="+", type=str, default= ['royal-oak-michigan-2021', 'birmingham-michigan-2021'], help='name of the city as mentioned in the mask full dir')
+    parser.add_argument('--percent_ls', nargs="+", type=str, default=['100', '100'], help='name of the city as mentioned in the mask full dir')
+    parser.add_argument('--month_ls', nargs="+", type=str, default=['mar', 'mar'], help='name of the city as mentioned in the mask full dir')
+    return parser.parse_args()
+
+
+
 if __name__ == '__main__':
     
+    args = get_args()
+    inference_cities = {}
+
+    for city, percent, month in zip(args.city_ls, args.percent_ls, args.month_ls):
+        inference_cities[city]=[percent, month]
+    print(inference_cities)
     # input configuration
-    config_dir = "./config.json"
-    inference_cities = {'flint-michigan-2024':['intersection','und']}
+    config_dir = "./config.json"  
+    #inference_cities = {'flint-michigan-2024':['intersection','und']}
     #{'troy-michigan-2024':['intersection','und'], 'flint-michigan-2024':['intersection','und'], 'auburnhills-michigan-sat-2024':['100','und'], 'southfield-michigan-maxar-2024':['100','und'] } 
     tile_size = "1250" 
     overlap_size = "150" 
@@ -342,3 +357,5 @@ if __name__ == '__main__':
                      model_trained_on_multiple_gpu,
                      user_name)
 
+# terminal run:
+# python inference.py --city_ls 'royal-oak-michigan-2021' 'birmingham-michigan-2021' --percent_ls '100' '100' --month_ls 'mar' 'mar'

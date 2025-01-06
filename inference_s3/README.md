@@ -43,8 +43,36 @@ Example of output_dir = "s3://geomate-data-repo-dev/datasets_vertical/pittsburg-
 # not to get credintial error first have aws configure sso set up and then run the following
  export AWS_PROFILE=PowerUserAccess-691506669376 
  
- python inference.py
+ python inference.py --city_ls 'royal-oak-michigan-2021' 'birmingham-michigan-2021' --percent_ls '100' '100' --month_ls 'mar' 'mar'
 ```
+
+
+### Using Docker to Run the Inference:
+if you want to run the inference by using the Docker you just need to adjust input argument in *./run.sh* file and then run it.
+It will first build the new docker image and then runs the docker file. Below you can see the  content of run.sh file:
+```bash
+#!/bin/bash
+
+# Step 1: Build the Docker image
+echo "Building the Docker image..."
+sudo docker build -t my_image .
+
+
+# Step 2: Run the Docker container with input arguments
+echo "Running the Docker container with input arguments..."
+sudo docker run --shm-size=1g -v ~/.aws:/root/.aws my_image --city_ls 'royal-oak-michigan-2021' 'birmingham-michigan-2021' --percent_ls '100' '100' --month_ls 'mar' 'mar'
+```
+1- open run.sh :
+```bash
+nano ./run.sh
+```
+2- Modify --city_ls, --percent_ls, --month_ls argumnet <br>
+3- save the changes and close the file <br>
+4- run the run.sh file:
+```bash
+./run.sh
+```
+
 ### After Inference:
 After generating the **rasters.pkl** file one should run post-processing to generate **.geojson** file form the rasters file. <br>
 

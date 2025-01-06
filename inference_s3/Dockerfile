@@ -31,4 +31,8 @@ RUN poetry add rasterio
 COPY . /app
 
 # Specify the entry point or command
-CMD ["python", "inference.py"]
+#CMD ["python", "inference.py"]
+ENTRYPOINT ["python", "inference.py"]
+
+# CMD is left empty so you can pass arguments to the container when running it
+CMD []
